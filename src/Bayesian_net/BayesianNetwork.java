@@ -1,3 +1,5 @@
+package Bayesian_net;
+
 import java.util.ArrayList;
 
 public class BayesianNetwork {
@@ -5,4 +7,6 @@ public class BayesianNetwork {
     public BayesianNetwork(){
         this.vars = new ArrayList<>();
     }
+
+
 }

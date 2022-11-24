@@ -1,3 +1,5 @@
+package Bayesian_net;
+
 import java.util.ArrayList;
 
 public class Variable {
