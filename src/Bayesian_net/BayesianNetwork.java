@@ -7,6 +7,11 @@ public class BayesianNetwork {
     public BayesianNetwork(){
         this.vars = new ArrayList<>();
     }
-
+    public void Add_Var(Variable var){
+        this.vars.add(var);
+    }
+    public ArrayList<Variable> getVars(){
+        return this.vars;
+    }
 
 }
