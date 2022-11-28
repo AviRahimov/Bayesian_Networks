@@ -16,22 +16,22 @@ import java.io.IOException;
 public class XMLParser {
     private static BayesianNetwork net = new BayesianNetwork();
 
-    // I need to do a function that will add to the arraylist of variables the variables from the xml file
-    // and to add the outcomes to the string array outcomes and the definition, prob  and so on...
     public static void main(String[] args) {
-        Insert_Variables("alarm_net.xml");
-        System.out.println(net.getVars().get(0));
+        Insert_Variables("big_net.xml");
+        System.out.println(net.getVars().get(4));
     }
-
+    /*
+    The Insert_Variables function get a XML file and extract the Variables from the file into bayesian network
+    by searching the elements that contain the names of the variables and the elements that contain the outcomes
+    for each variable
+     */
     public static void Insert_Variables(String xml) {
         File XML_file = new File(xml);
-        // The var name
+        // The variable name
         String name = null;
         // the number of outcomes in the var
         int count = 0;
-        // all outcomes
-//        String [] s = new String[count];
-        int counter = 0;
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -42,25 +42,30 @@ public class XMLParser {
             doc.getDocumentElement().normalize();
             // Getting all the elements by tag name
             NodeList VariablesList = doc.getElementsByTagName("VARIABLE");
-            // 5 iterations because the name VARIABLE
+
             for (int i = 0; i < VariablesList.getLength(); i++) {
                 //each Node is a Node that contain a Variable
                 Node Variable_num = VariablesList.item(i);
                 if (Variable_num.getNodeType() == Node.ELEMENT_NODE) {
                     Element e1 = (Element) Variable_num;
                     count = e1.getElementsByTagName("OUTCOME").getLength();
-                    name = String.valueOf(VariablesList.item(i).getTextContent().charAt(2));
+                    name = VariablesList.item(i).getFirstChild().getNextSibling().getFirstChild().getTextContent();
                 }
                 String [] s = new String[count];
                 for (int j = 0; j < count; j++) { // this is for the outcomes values
-//                    s[j] = ;
-                    System.out.println(String.valueOf(VariablesList.item(i).getTextContent().charAt(5)));
+                    s[j] = ((Element) Variable_num).getElementsByTagName("OUTCOME").item(j).getTextContent();
                 }
-//                net.Add_Var(new Variable(name, s));
+                net.Add_Var(new Variable(name, s));
             }
             //here I need to do the same for the definition element
+            NodeList DefinitionList = doc.getElementsByTagName("DEFENITION");
 
-
+            for (int i = 0; i < DefinitionList.getLength(); i++) {
+                Node Def = DefinitionList.item(i);
+                if (Def.getNodeType() == Node.ELEMENT_NODE) {
+                    Element e1 = (Element) Def;
+                }
+            }
 
 
         } catch (ParserConfigurationException e) {

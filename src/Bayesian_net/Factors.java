@@ -1,8 +1,10 @@
 package Bayesian_net;
 
+import java.util.HashMap;
+
 public class Factors {
     private Variable var;
     private Variable[] var_parents;
-//    private ; hash table for prob
-//    private boolean evidence;
+    private HashMap<String, Double> Prob_table;
+//    private boolean evidence
 }
