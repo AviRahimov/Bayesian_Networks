@@ -17,8 +17,8 @@ public class XMLParser {
     private static BayesianNetwork net = new BayesianNetwork();
 
     public static void main(String[] args) {
-        Insert_Variables("big_net.xml");
-        System.out.println(net.getVars().get(4));
+        Insert_Variables("alarm_net.xml");
+        System.out.println(net.getNet());
     }
     /*
     The Insert_Variables function get a XML file and extract the Variables from the file into bayesian network
@@ -57,13 +57,27 @@ public class XMLParser {
                 }
                 net.Add_Var(new Variable(name, s));
             }
-            //here I need to do the same for the definition element
-            NodeList DefinitionList = doc.getElementsByTagName("DEFENITION");
-
+            // Build the CPT for each variable by extracting all parents and children
+            NodeList DefinitionList = doc.getElementsByTagName("DEFINITION");
+            // Initialized a String array that holds all FOR variables
+            String for_var [] = new String[net.getNet().size()];
             for (int i = 0; i < DefinitionList.getLength(); i++) {
                 Node Def = DefinitionList.item(i);
                 if (Def.getNodeType() == Node.ELEMENT_NODE) {
                     Element e1 = (Element) Def;
+                    // collect the names of the variables that I want to build their CPT
+                    for_var[i] = e1.getElementsByTagName("FOR").item(0).getTextContent();
+
+                    // Create a NodeList that hold the parents for each variable
+                    NodeList Parents = e1.getElementsByTagName("GIVEN");
+                    // If condition to check if a variable has parents or not
+                    if (Parents.getLength()!= 0){
+                        for (int j = 0; j < Parents.getLength(); j++) {
+                            net.getNet().get(i).addParent(net.getVars(Parents.item(j).getTextContent()));
+                            net.getVars(Parents.item(j).getTextContent()).addChild(temp);
+                                    //רוצה לבדוק אם יש ברשת משתנה שהוא בשם של GIVEN כדי שאוכל לפעול
+                        }
+                        }
                 }
             }
 
