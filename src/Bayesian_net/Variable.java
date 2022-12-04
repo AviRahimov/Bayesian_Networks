@@ -49,14 +49,37 @@ public class Variable {
     public boolean isParent(){
         return this.Var_Parents.size()>0;
     }
+
     @Override
     public String toString() {
-        return "Variable{" +
-                "Var_Parents=" + Var_Parents +
-                ", Var_Children=" + Var_Children +
-                ", Var_name='" + Var_name + '\'' +
-                ", Outcomes=" + Arrays.toString(Outcomes) +
-                ", CPT=" + CPT +
-                '}' + "\n";
+        String Parents = "";
+        String Children = "";
+        if(isParent()) {
+            Parents += "[";
+            for (int i = 0; i < Var_Parents.size(); i++) {
+                Parents += Var_Parents.get(i).Var_name + ",";
+            }
+            Parents = Parents.substring(0, Parents.length()-1) + "]";
+        }
+        else
+            Parents = "[]";
+        if(Var_Children.size()!=0) {
+            Children += "[";
+            for (int i = 0; i < Var_Children.size(); i++) {
+                Children += Var_Children.get(i).Var_name + ",";
+            }
+            Children = Children.substring(0, Children.length()-1) + "]";
+        }
+        else
+            Children = "[]";
+
+
+        return  "Variable " + Var_name + ":\n" +
+                "Var_Parents=" + Parents +
+                "\nVar_Children=" + Children +
+                "\nVar_name='" + Var_name + '\'' +
+                "\nOutcomes=" + Arrays.toString(Outcomes) +
+                "\nCPT=" + CPT +
+                "\n\n";
     }
 }

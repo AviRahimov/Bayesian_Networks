@@ -21,7 +21,7 @@ public class XMLParser {
         System.out.println(net.getNet());
     }
     /*
-    The Insert_Variables function get a XML file and extract the Variables from the file into bayesian network
+    The Insert_Variables function get an XML file and extract the Variables from the file into bayesian network
     by searching the elements that contain the names of the variables and the elements that contain the outcomes
     for each variable
      */
@@ -29,7 +29,7 @@ public class XMLParser {
         File XML_file = new File(xml);
         // The variable name
         String name = null;
-        // the number of outcomes in the var
+        // the number of outcomes in the variable
         int count = 0;
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
@@ -57,31 +57,45 @@ public class XMLParser {
                 }
                 net.Add_Var(new Variable(name, s));
             }
-            // Build the CPT for each variable by extracting all parents and children
+            /*
+            The Definition part - in this part I'm going to extract the parents, children and the cpt for all the
+            variables.
+             */
             NodeList DefinitionList = doc.getElementsByTagName("DEFINITION");
-            // Initialized a String array that holds all FOR variables
-            String for_var [] = new String[net.getNet().size()];
+            Variable temp = null;
+
             for (int i = 0; i < DefinitionList.getLength(); i++) {
                 Node Def = DefinitionList.item(i);
                 if (Def.getNodeType() == Node.ELEMENT_NODE) {
                     Element e1 = (Element) Def;
-                    // collect the names of the variables that I want to build their CPT
-                    for_var[i] = e1.getElementsByTagName("FOR").item(0).getTextContent();
+                    /*
+                     collect the names of the variables that I want to add their parent and children and
+                    to build the cpt.
+                    */
+                    temp = net.getVars(e1.getElementsByTagName("FOR").item(0).getTextContent());
 
-                    // Create a NodeList that hold the parents for each variable
                     NodeList Parents = e1.getElementsByTagName("GIVEN");
-                    // If condition to check if a variable has parents or not
+                    /*
+                     If condition to check if a variable has parents or not
+                     then if the Variable has parents then add them to Variable Parents
+                     and do the same for the parent, the same means that also the parent add the
+                     current variable as a child.
+                    */
                     if (Parents.getLength()!= 0){
                         for (int j = 0; j < Parents.getLength(); j++) {
-                            net.getNet().get(i).addParent(net.getVars(Parents.item(j).getTextContent()));
-                            net.getVars(Parents.item(j).getTextContent()).addChild(temp);
-                                    //רוצה לבדוק אם יש ברשת משתנה שהוא בשם של GIVEN כדי שאוכל לפעול
+                            Variable parent = net.getVars(Parents.item(j).getTextContent());
+                            temp.addParent(parent);
+                            parent.addChild(temp);
                         }
-                        }
+                    }
+                    /*
+                    all I have to do now is to add the cpt's for each variable and then start the first
+                    question in the assignment thanks to GOD;
+                    */
+
+
                 }
             }
-
-
         } catch (ParserConfigurationException e) {
         throw new RuntimeException(e);
     } catch (IOException e) {
