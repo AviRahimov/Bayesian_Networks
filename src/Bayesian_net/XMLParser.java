@@ -1,6 +1,5 @@
 package Bayesian_net;
 
-import Bayesian_net.BayesianNetwork;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -15,19 +14,20 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class XMLParser {
-    private static BayesianNetwork net = new BayesianNetwork();
+    private final BayesianNetwork net;
 
-    public static void main(String[] args) {
-        Insert_Variables("alarm_net.xml");
-//        System.out.println(net.getNet());
-    }
     /*
-    The Insert_Variables function get an XML file and extract the Variables from the file into bayesian network
+    The Constructor get an XML file and extract the Variables from the file into bayesian network
     by searching the elements that contain the names of the variables and the elements that contain the outcomes
     for each variable
      */
-    public static void Insert_Variables(String xml) {
+    public XMLParser(String xml) {
         File XML_file = new File(xml);
+        this.net = parse_file(XML_file);
+    }
+
+    public BayesianNetwork parse_file(File file) {
+        BayesianNetwork net = new BayesianNetwork();
         // The variable name
         String name = null;
         // the number of outcomes in the variable
@@ -37,7 +37,7 @@ public class XMLParser {
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
             // Getting the Document
-            Document doc = builder.parse(new File(xml));
+            Document doc = builder.parse(file);
 
             // Normalize the xml file
             doc.getDocumentElement().normalize();
@@ -52,7 +52,7 @@ public class XMLParser {
                     count = e1.getElementsByTagName("OUTCOME").getLength();
                     name = VariablesList.item(i).getFirstChild().getNextSibling().getFirstChild().getTextContent();
                 }
-                String [] s = new String[count];
+                String[] s = new String[count];
                 for (int j = 0; j < count; j++) { // this is for the outcomes values
                     s[j] = ((Element) Variable_num).getElementsByTagName("OUTCOME").item(j).getTextContent();
                 }
@@ -63,7 +63,7 @@ public class XMLParser {
             variables.
              */
             NodeList DefinitionList = doc.getElementsByTagName("DEFINITION");
-            Variable temp = null;
+            Variable temp;
 
             for (int i = 0; i < DefinitionList.getLength(); i++) {
                 Node Def = DefinitionList.item(i);
@@ -73,7 +73,7 @@ public class XMLParser {
                      collect the names of the variables that I want to add their parent and children and
                     to build the cpt.
                     */
-                    temp = net.getVars(e1.getElementsByTagName("FOR").item(0).getTextContent());
+                   temp = (net.getVars(e1.getElementsByTagName("FOR").item(0).getTextContent()));
 
                     NodeList Parents = e1.getElementsByTagName("GIVEN");
                     /*
@@ -82,7 +82,7 @@ public class XMLParser {
                      and do the same for the parent, the same means that also the parent add the
                      current variable as a child.
                     */
-                    if (Parents.getLength()!= 0){
+                    if (Parents.getLength() != 0) {
                         for (int j = 0; j < Parents.getLength(); j++) {
                             Variable parent = net.getVars(Parents.item(j).getTextContent());
                             temp.addParent(parent);
@@ -94,47 +94,71 @@ public class XMLParser {
                     create the cpt for them and the second array contains the probabilities for each
                     variation of some variables
                      */
-                    String [] cpt_prob = e1.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
-                    String [] cpt_vars = new String[e1.getElementsByTagName("TABLE").item(0).getTextContent().split(" ").length];
-                    Arrays.fill(cpt_vars,"");
+                    String[] cpt_prob = e1.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
+                    String[] cpt_vars = new String[e1.getElementsByTagName("TABLE").item(0).getTextContent().split(" ").length];
+                    Arrays.fill(cpt_vars, "");
                     //checking if the variable has parents or not
-                    if(temp.isParent()) {
+                    if (temp.isParent()) {
                         /*
                         each parent has different appearance in the cpt table, so I arrange the table such that
                          each parent will be in the right spot with the right probability
                         */
-                        int perform_num = (cpt_prob.length);
+                        int perform_num = cpt_vars.length;
                         for (int j = 0; j < temp.getParents().size(); j++) {
-                            perform_num = (cpt_prob.length)/(temp.getParents().get(j).getOutcomes().length);
+                            perform_num /= (temp.getParents().get(j).getOutcomes().length);
 
                             //counter will count the number of time I used the parent variable in the same outcome
                             //and f switch when needed the outcome for the variable
                             int counter = 0;
                             int f = 0;
-                            for (int k = 0; k < cpt_prob.length; k++) {
-                                if(counter < perform_num){
-                                    cpt_prob[k] += temp.getParents().get(j).getVar_name() + "=" + temp.getParents().get(j).getOutcomes()[f] + ",";
+                            for (int k = 0; k < cpt_vars.length; k++) {
+                                if (counter < perform_num) {
+                                    cpt_vars[k] += temp.getParents().get(j).getVar_name() + "=" + temp.getParents().get(j).getOutcomes()[f] + ",";
+                                    counter++;
                                 }
-                                else{
+                                else {
                                     f++;
                                     f %= temp.getParents().get(j).getOutcomes().length;
                                     counter = 0;
+                                    k--;
                                 }
                             }
                         }
+                    }
+                    for (int j = 0; j < cpt_vars.length; j++) {
+                        for (int k = 0; k < temp.getOutcomes().length; k++) {
+                            if(temp.isParent())
+                                cpt_vars[j] = temp.getVar_name() + "=" + temp.getOutcomes()[k] + "|" + cpt_vars[j];
+                            else
+                                cpt_vars[j] = temp.getVar_name() + "=" + temp.getOutcomes()[k];
+
+                            j++;
+                        }
+                        j--;
 
                     }
-                    // I finished the cpt only for the parents, now I need to add the variable itself and
-                    // after that I need to add the probabilities, and I'm done.
+                    for (int j = 0; j < cpt_vars.length; j++) {
+                        if(temp.isParent())
+                            cpt_vars[j] = "P(" + cpt_vars[j].substring(0, cpt_vars[j].length()-1) + ")";
+                        else
+                            cpt_vars[j] = "P(" + cpt_vars[j] + ")";
+                        temp.getCPT().put(cpt_vars[j], Double.parseDouble(cpt_prob[j]));
+                    }
+//                    int index = 0;
+//                    temp.getCPT().put(cpt_vars[index], Double.parseDouble(cpt_prob[index]));
+//                    index++;
+//                        System.out.println(cpt_prob[j]);
+
 
                 }
             }
-        } catch (ParserConfigurationException e) {
-        throw new RuntimeException(e);
-    } catch (IOException e) {
-        throw new RuntimeException(e);
-    } catch (SAXException e) {
-        throw new RuntimeException(e);
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }
+        return net;
     }
+
+        public BayesianNetwork getNet () {
+        return net;
     }
 }
