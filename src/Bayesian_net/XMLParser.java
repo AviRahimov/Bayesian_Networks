@@ -12,13 +12,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class XMLParser {
     private static BayesianNetwork net = new BayesianNetwork();
 
     public static void main(String[] args) {
         Insert_Variables("alarm_net.xml");
-        System.out.println(net.getNet());
+//        System.out.println(net.getNet());
     }
     /*
     The Insert_Variables function get an XML file and extract the Variables from the file into bayesian network
@@ -89,10 +90,42 @@ public class XMLParser {
                         }
                     }
                     /*
-                    all I have to do now is to add the cpt's for each variable and then start the first
-                    question in the assignment thanks to GOD;
-                    */
+                    Creating two string arrays that the first contains the variables that I"m going to
+                    create the cpt for them and the second array contains the probabilities for each
+                    variation of some variables
+                     */
+                    String [] cpt_prob = e1.getElementsByTagName("TABLE").item(0).getTextContent().split(" ");
+                    String [] cpt_vars = new String[e1.getElementsByTagName("TABLE").item(0).getTextContent().split(" ").length];
+                    Arrays.fill(cpt_vars,"");
+                    //checking if the variable has parents or not
+                    if(temp.isParent()) {
+                        /*
+                        each parent has different appearance in the cpt table, so I arrange the table such that
+                         each parent will be in the right spot with the right probability
+                        */
+                        int perform_num = (cpt_prob.length);
+                        for (int j = 0; j < temp.getParents().size(); j++) {
+                            perform_num = (cpt_prob.length)/(temp.getParents().get(j).getOutcomes().length);
 
+                            //counter will count the number of time I used the parent variable in the same outcome
+                            //and f switch when needed the outcome for the variable
+                            int counter = 0;
+                            int f = 0;
+                            for (int k = 0; k < cpt_prob.length; k++) {
+                                if(counter < perform_num){
+                                    cpt_prob[k] += temp.getParents().get(j).getVar_name() + "=" + temp.getParents().get(j).getOutcomes()[f] + ",";
+                                }
+                                else{
+                                    f++;
+                                    f %= temp.getParents().get(j).getOutcomes().length;
+                                    counter = 0;
+                                }
+                            }
+                        }
+
+                    }
+                    // I finished the cpt only for the parents, now I need to add the variable itself and
+                    // after that I need to add the probabilities, and I'm done.
 
                 }
             }
