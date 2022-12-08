@@ -144,12 +144,6 @@ public class XMLParser {
                             cpt_vars[j] = "P(" + cpt_vars[j] + ")";
                         temp.getCPT().put(cpt_vars[j], Double.parseDouble(cpt_prob[j]));
                     }
-//                    int index = 0;
-//                    temp.getCPT().put(cpt_vars[index], Double.parseDouble(cpt_prob[index]));
-//                    index++;
-//                        System.out.println(cpt_prob[j]);
-
-
                 }
             }
         } catch (ParserConfigurationException | IOException | SAXException e) {
