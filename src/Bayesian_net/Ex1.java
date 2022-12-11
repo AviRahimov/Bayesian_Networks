@@ -1,9 +1,22 @@
 package Bayesian_net;
 
 import java.io.*;
-import java.util.Scanner;
+import java.util.Arrays;
 
 public class Ex1 {
+    public static void main(String[]args) throws IOException {
+        XMLParser xml = new XMLParser("alarm_net.xml");
+        Algorithms a = new Algorithms("P(B=T|J=T,M=T)", xml.getNet());
+        System.out.println(a.Simple_dist());
+        System.out.println(a.getAdd_count());
+        System.out.println(a.getMult_count());
+    }
+
+
+
+
+
+    /*
     public static void main(String[]args) throws IOException {
         try{
             write_output_text(args[0]);
@@ -62,4 +75,5 @@ public class Ex1 {
         reader.close();
         out_file.close();
     }
+    */
 }
