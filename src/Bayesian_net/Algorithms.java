@@ -13,11 +13,17 @@ public class Algorithms {
     private String question;
     private int mult_count = 0;
     private int add_count = 0;
-    private ArrayList<Variable> hidden= new ArrayList<Variable>();
     public Algorithms(String question, BayesianNetwork net){
         this.net = net;
         this.question = question;
     }
+
+    /**
+     *
+     * @param question is the probability String that I want to compute. this function is only checks
+     *                 if the question that given is in the cpt of some variable or not.
+     * @return the probability if exist and -1 if not.
+     */
     public double cpt_is_exist(String question){
         for (int i = 0; i < net.getNet().size(); i++) {
             for (int j = 0; j < net.getNet().get(i).getCPT().size(); j++) {
@@ -29,28 +35,51 @@ public class Algorithms {
         return -1;
     }
 
+    /**
+     *
+     * @return The probability of the question by the first method i.e. method number 1 - simple deduction
+     */
     public double Simple_dist(){
-
         if(cpt_is_exist(question) != -1){
             return cpt_is_exist(question);
         }
-
-        String str = "";
-        for (String outcomes: net.getVars(String.valueOf(question.charAt(2))).getOutcomes()) {
-            if(!outcomes.equals(String.valueOf(question.charAt(2)))){
-                str = "P(" +question.charAt(2) + "=" + outcomes + question.substring(question.indexOf("|"), question.length());
+        /*
+         initialize a string array that holds the variables we need to compute to get the denominator
+         of the fraction, for example: if i have the question:P(B=T|J=F) so, by bayes I can compute this:
+         P(B=T|J=F) = P(B=T,J=F)/P(J=F) but P(J=F) by the law of total probability equal to P(B=T,J=F) + P(B=F,J=F).
+        */
+        ArrayList<String> complete_strings = new ArrayList<>();
+        for (String outcomes: net.getVars(question.substring(2, question.indexOf("="))).getOutcomes()) {
+            if(!outcomes.equals(question.substring(question.indexOf("=")+1, question.indexOf("|")))){
+                complete_strings.add("P(" + question.substring(2, question.indexOf("=")) + "=" + outcomes + question.substring(question.indexOf("|"), question.length()));
             }
         }
-
-        double mone = simple_probability(this.question);
-        double mashlim_mone = simple_probability(str);
-//        double mechane = simple_probability("P(" + question.substring(question.indexOf("|")+1, question.length()));
-        double total_probability_for_question = mone/(mone+mashlim_mone);
-
+        /*
+         The number of times I Call the Simple_prob function is equal to the number of elements in
+         the complete_string array
+        */
+        double complement = 0;
+        for (int i = 0; i < complete_strings.size(); i++) {
+            complement+=Simple_Prob(complete_strings.get(i));
+        }
+        // Computing the whole probability and name it total_probability_for_question.
+        double numerator = Simple_Prob(this.question);
+        double total_probability_for_question = numerator/(numerator+complement);
+        add_count++;
         return total_probability_for_question;
     }
 
-    public double simple_probability(String question){
+    /**
+     *
+     * @param question the probability string that I need to compute
+     * @return specific probability to the probability string that the function gets,
+     * important: this function not return the full solution in one call, we need to call it several times to
+     * compute the whole probability as I mentioned above.
+     */
+    public double Simple_Prob(String question){
+        // arraylist that contains all the hidden variables
+        ArrayList<Variable> hidden = new ArrayList<>();
+
         int num_outcomes_hidden = 1;
 
         // add the hidden variables to arraylist
@@ -106,13 +135,13 @@ public class Algorithms {
         for(String s:all_var_to_count){
             curr = s.substring(2, s.length());
             for (int i = 0; i <net.getNet().size(); i++) {
-                if(net.getVars(String.valueOf(curr.charAt(0))).isParent()){
-                    for (String exist_cpt: net.getVars(String.valueOf(curr.charAt(0))).getCPT().keySet()){
+                if(net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).isParent()){
+                    for (String exist_cpt: net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getCPT().keySet()){
                         temp_exist = exist_cpt.replace("|", ",");
                         temp_exist = temp_exist.replace(")", ",");
                         int temp_count = 2;// 6
                         boolean is_exist = true;
-                        for (int j = 0; j < net.getVars(String.valueOf(curr.charAt(0))).getParents().size()+1; j++){
+                        for (int j = 0; j < net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getParents().size()+1; j++){
                             if(!(s.contains(temp_exist.substring(temp_count, temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + temp_count)))){
                                 is_exist = false;
                                 break;
@@ -147,10 +176,14 @@ public class Algorithms {
             for (int j = 0; j < net.getNet().size(); j++) {
                 if(i.substring(index+1).indexOf("P") == -1){
                     temp = i.substring(index);
+//                    v = net.getVars(String.valueOf(temp.substring(2, temp.indexOf("="))));
+//                    calculate_prob*=v.getCPT().get(temp);
+//                    mult_count+=4;
+//                    break;
                 }
                 else
                     temp = i.substring(index, i.substring(index+1, i.length()).indexOf("P")+1 + index);
-                v = net.getVars(String.valueOf(temp.charAt(2)));
+                v = net.getVars(String.valueOf(temp.substring(2, temp.indexOf("="))));
                 calculate_prob*=v.getCPT().get(temp);
                 index = i.substring(index+1).indexOf("P")+1+index;
                 mult_count++;
@@ -160,19 +193,8 @@ public class Algorithms {
             mult_count--;
         }
         add_count--;
-        return calculate_prob;
+        return total_prob;
     }
-    public double Variable_Elimination(){
-        if(cpt_is_exist(question) != -1){
-            cpt_is_exist(question);
-        }
-        else{
-
-        }
-        return 0;
-    }
-    public double My_Variable_Elimination(){
-        return 0;}
     public int getMult_count(){
         return mult_count;
     }

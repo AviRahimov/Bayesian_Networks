@@ -5,11 +5,12 @@ import java.util.Arrays;
 
 public class Ex1 {
     public static void main(String[]args) throws IOException {
-        XMLParser xml = new XMLParser("alarm_net.xml");
-        Algorithms a = new Algorithms("P(B=T|J=T,M=T)", xml.getNet());
+        XMLParser xml = new XMLParser("big_net.xml");
+        Algorithms a = new Algorithms("P(A2=T|C2=v1)", xml.getNet());
         System.out.println(a.Simple_dist());
         System.out.println(a.getAdd_count());
         System.out.println(a.getMult_count());
+
     }
 
 
