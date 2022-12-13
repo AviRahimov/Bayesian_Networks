@@ -45,7 +45,7 @@ public class Ex1 {
                     ans = Double.toString(simple_probability.Simple_dist()).substring(0, 7) + "," + Integer.toString(simple_probability.getAdd_count()) + "," + Integer.toString(simple_probability.getMult_count());
                 }
             } //else if (line.charAt(-1) == '2') {
-//                VariableElimination_algo variable_elim = new VariableElimination_algo(line.substring(0, line.length()-1), xml.getNet());
+//                Bayesian_net.VariableElimination_algo variable_elim = new Bayesian_net.VariableElimination_algo(line.substring(0, line.length()-1), xml.getNet());
 //                if(Double.toString(variable_elim.Variable_Elimination()).length()<7){
 //                    ans = Double.toString(variable_elim.Variable_Elimination()) + "," + Integer.toString(variable_elim.getAdd_count()) + "," + Integer.toString(variable_elim.getMult_count());
 //                }

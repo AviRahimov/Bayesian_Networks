@@ -1,9 +1,42 @@
 package Bayesian_net;
+
 import java.util.*;
 
 public class VariableElimination_algo {
+    private BayesianNetwork net = new BayesianNetwork();
+    private String question;
 
+    private int mult_count = 0;
 
+    private int add_count = 0;
+
+    // Constructor
+    public VariableElimination_algo(String question, BayesianNetwork net){
+        this.question = question;
+        this.net = net;
+    }
+    public ArrayList<Variable> getEvidence(){
+        ArrayList<Variable> evidence= new ArrayList<>();
+        for (int i = 0; i < net.getNet().size(); i++) {
+            if(question.substring(question.indexOf("|")).contains(net.getNet().get(i).getVar_name())){
+                evidence.add(net.getNet().get(i));
+            }
+        }
+        return evidence;
+    }
+    public Variable getQuery(){
+        Variable query = net.getVars(question.substring(2, question.indexOf("=")));;
+        return query;
+    }
+    public ArrayList<Variable> getHidden(){
+        ArrayList<Variable> hidden = new ArrayList<>();
+        for (int i = 0; i < net.getNet().size(); i++) {
+            if(!(question.contains(net.getNet().get(i).getVar_name()))){
+                hidden.add(net.getNet().get(i));
+            }
+        }
+        return hidden;
+    }
 
 
 
@@ -125,7 +158,7 @@ public class VariableElimination_algo {
 //
 //
 //    // Constructor.
-//    public VariableElimination_algo(String question, BayesianNetwork net) {
+//    public Bayesian_net.VariableElimination_algo(String question, BayesianNetwork net) {
 //        this.net = net;
 //        this.evidence = new ArrayList<>();
 //        this.hidden_by_order = new ArrayList<>();
@@ -147,7 +180,7 @@ public class VariableElimination_algo {
 //        }
 //    }
 //
-//    public VariableElimination_algo() {
+//    public Bayesian_net.VariableElimination_algo() {
 //    }
 //     **/
 //    /*
