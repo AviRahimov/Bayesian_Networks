@@ -25,11 +25,28 @@ public class Algorithms {
      * @return the probability if exist and -1 if not.
      */
     public double cpt_is_exist(String question){
-        for (int i = 0; i < net.getNet().size(); i++) {
-            for (int j = 0; j < net.getNet().get(i).getCPT().size(); j++) {
-                if(net.getNet().get(i).getCPT().keySet().contains(question)){
-                    return net.getNet().get(i).getCPT().get(question);
+        String temp_exist = "";
+
+        for (String exist_cpt: net.getVars(String.valueOf(question.substring(2, question.indexOf("=")))).getCPT().keySet()){
+            temp_exist = exist_cpt.replace("|", ",");
+            temp_exist = temp_exist.replace(")", ",");
+            int temp_count = 2;// 6
+            boolean is_exist = true;
+            for (int j = 0; j < question.chars().filter(ch -> ch == '=').count();j++){
+                try {
+                    if(!(question.contains(temp_exist.substring(temp_count, temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + temp_count)))){
+                        is_exist = false;
+                        break;
+                    }
+                } catch (StringIndexOutOfBoundsException e) {
+                    return -1;
                 }
+
+                temp_count+=temp_exist.substring(temp_count, temp_exist.length()).indexOf(",")+1;
+            }
+            if (is_exist == true){
+                String cpt = question.substring(2, question.indexOf("="));
+                return net.getVars(cpt).getCPT().get(exist_cpt);
             }
         }
         return -1;
