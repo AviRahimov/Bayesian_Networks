@@ -15,11 +15,18 @@ public class VariableElimination_algo {
         this.question = question;
         this.net = net;
     }
-    public ArrayList<Variable> getEvidence(){
-        ArrayList<Variable> evidence= new ArrayList<>();
-        for (int i = 0; i < net.getNet().size(); i++) {
-            if(question.substring(question.indexOf("|")).contains(net.getNet().get(i).getVar_name())){
-                evidence.add(net.getNet().get(i));
+    public ArrayList<String> getEvidence(){
+        ArrayList<String> evidence= new ArrayList<>();
+        String temp = "";
+        for (int i = question.indexOf("|")+1; i < question.length()-1; i++) {
+            temp = question.substring(i);
+            temp = temp.replace(")", ",");
+            evidence.add(question.substring(i, temp.indexOf(",") + i));
+            if(temp.indexOf(",") == temp.length()-1){
+                return evidence;
+            }
+            else {
+                i = temp.indexOf(",") + i;
             }
         }
         return evidence;
@@ -36,6 +43,19 @@ public class VariableElimination_algo {
             }
         }
         return hidden;
+    }
+    public void Evidence_elimination(ArrayList<String> evidence){
+        evidence = getEvidence();
+        HashMap<String, Double> curr_cpt;
+        for (String evidence_var : evidence) {
+            curr_cpt = new HashMap<>();
+            for (String cpt : net.getVars(evidence_var.substring(0, evidence_var.indexOf("="))).getCPT().keySet()){
+                if(cpt.contains(evidence_var)){
+                    curr_cpt.put(cpt, net.getVars(evidence_var.substring(0, evidence_var.indexOf("="))).getCPT().get(cpt));
+                }
+            }
+            net.getVars(evidence_var.substring(0, evidence_var.indexOf("="))).setCPT(curr_cpt);
+        }
     }
 
 

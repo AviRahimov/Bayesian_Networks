@@ -39,6 +39,9 @@ public class Variable {
     public HashMap<String, Double> getCPT() {
         return this.CPT;
     }
+    public void setCPT(HashMap new_cpt){
+        this.CPT = new_cpt;
+    }
 
     public void addParent(Variable parent){
         this.Var_Parents.add(parent);
