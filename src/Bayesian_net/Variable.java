@@ -20,6 +20,7 @@ public class Variable {
         this.Var_Parents = new ArrayList<>();
         this.CPT = new HashMap<>();
     }
+
     public String getVar_name() {
         return Var_name;
     }

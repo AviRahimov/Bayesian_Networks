@@ -7,35 +7,37 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Ex1 {
-//    public static void main(String[]args) throws IOException {
-//        XMLParser xml = new XMLParser("alarm_net.xml");
-//        Algorithms a = new Algorithms("P(J=T|B=T)", xml.getNet());
-//        System.out.println(a.Simple_dist());
-//    }
-
-
-//    public static void main(String[]args) throws IOException {
-//        Scanner file = new Scanner(System.in);
-//        try{
-//            write_output_text(String.valueOf(file));
-//        }
-//        catch (Exception e){
-//            write_output_text("input.txt");
-//        }
-//    }
-
     public static void main(String[]args) throws IOException {
-        XMLParser xml = new XMLParser("alarm_net.xml");
+//        XMLParser xml = new XMLParser("alarm_net.xml");
+        XMLParser xml = new XMLParser("big_net.xml");
+//        Variable R = new Variable("R", new String[]{"T", "F"});
+//        Variable C = new Variable("C", new String[]{"T", "F"});
+//        Variable H = new Variable("H", new String[]{"T", "F"});
+//        Variable D = new Variable("D", new String[]{"T", "F"});
+//        xml.getNet().Add_Var(R);
+//        xml.getNet().Add_Var(C);
+//        xml.getNet().Add_Var(H);
+//        xml.getNet().Add_Var(D);
+//        xml.getNet().getVars("R").addChild(xml.getNet().getVars("E"));
+//        xml.getNet().getVars("R").addChild(C);
+//        xml.getNet().getVars("C").addChild(H);
+//        xml.getNet().getVars("C").addChild(D);
+//        xml.getNet().getVars("E").addParent(R);
+//        xml.getNet().getVars("C").addParent(R);
+//        xml.getNet().getVars("H").addParent(C);
+//        xml.getNet().getVars("D").addParent(C);
+
 //        Algorithms a = new Algorithms("P(J=T|B=T,A=F)", xml.getNet());
-        VariableElimination_algo v = new VariableElimination_algo("P(J=T|B=T,A=F)", xml.getNet());
-        System.out.println(xml.getNet());
+//        VariableElimination_algo v = new VariableElimination_algo("P(J=T|B=T,A=F)", xml.getNet());
+        VariableElimination_algo v = new VariableElimination_algo("P(D1=T|C2=v1,C3=F)", xml.getNet());
 //        System.out.printf("%.5f %n", a.Simple_dist());
 //        System.out.println(a.getAdd_count());
 //        System.out.println(a.getMult_count());
-        ArrayList<String> ev = new ArrayList<>();
-        ev.add("B");
-        ev.add("A");
-        v.Evidence_elimination(ev);
+//        System.out.println(xml.getNet());
+        v.Evidence_elimination();
+        v.Hidden_elimination();
+//        System.out.println("**********************************************************************************");
+        System.out.println(xml.getNet());
         }
 
 
