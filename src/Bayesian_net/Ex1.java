@@ -36,8 +36,9 @@ public class Ex1 {
 //        System.out.println(xml.getNet());
         v.Evidence_elimination();
         v.Hidden_elimination();
+        v.join();
 //        System.out.println("**********************************************************************************");
-        System.out.println(xml.getNet());
+//        System.out.println(xml.getNet());
         }
 
 

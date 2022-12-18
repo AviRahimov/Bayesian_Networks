@@ -30,7 +30,7 @@ public class Algorithms {
         for (String exist_cpt: net.getVars(String.valueOf(question.substring(2, question.indexOf("=")))).getCPT().keySet()){
             temp_exist = exist_cpt.replace("|", ",");
             temp_exist = temp_exist.replace(")", ",");
-            int temp_count = 2;// 6
+            int temp_count = 2;
             boolean is_exist = true;
             for (int j = 0; j < question.chars().filter(ch -> ch == '=').count();j++){
                 try {
@@ -156,7 +156,7 @@ public class Algorithms {
                     for (String exist_cpt: net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getCPT().keySet()){
                         temp_exist = exist_cpt.replace("|", ",");
                         temp_exist = temp_exist.replace(")", ",");
-                        int temp_count = 2;// 6
+                        int temp_count = 2;
                         boolean is_exist = true;
                         for (int j = 0; j < net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getParents().size()+1; j++){
                             if(!(s.contains(temp_exist.substring(temp_count, temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + temp_count)))){
@@ -193,10 +193,6 @@ public class Algorithms {
             for (int j = 0; j < net.getNet().size(); j++) {
                 if(i.substring(index+1).indexOf("P") == -1){
                     temp = i.substring(index);
-//                    v = net.getVars(String.valueOf(temp.substring(2, temp.indexOf("="))));
-//                    calculate_prob*=v.getCPT().get(temp);
-//                    mult_count+=4;
-//                    break;
                 }
                 else
                     temp = i.substring(index, i.substring(index+1, i.length()).indexOf("P")+1 + index);

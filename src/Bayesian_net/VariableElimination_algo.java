@@ -104,5 +104,67 @@ public class VariableElimination_algo {
         return false;
     }
     // The join function...
-//    public
+    //need to join all the variables that contain the hidden variables remained and finally to eliminate the current hidden
+    public void join(){
+        ArrayList<String> hidden_sorted = new ArrayList<>();
+        /*
+         saving  2 minimum factor sizes to find the two minimalistic factors and join them
+         in addition, saving their indexes to send them to the join_two_factors function,
+         I'm not sending the factors in the current map of factors because I remove them from the map
+        and can't access them after deletion.
+        */
+        int min_factor_size1 = Integer.MAX_VALUE;
+        int index_min_factor1 = 0;
+        int min_factor_size2 = Integer.MAX_VALUE;
+        int index_min_factor2 = 0;
+        HashMap<String,Double> join_factor1 = new HashMap<>();
+        HashMap<String,Double> join_factor2 = new HashMap<>();
+        // sorting the hidden variables by their name(Ascii)
+        for (Variable hidden : getHidden()){
+            hidden_sorted.add(hidden.getVar_name());
+        }
+        Collections.sort(hidden_sorted);
+        //checking the variables that contain the hidden variables and put them in an arraylist
+        for (String hidden : hidden_sorted){
+            ArrayList<HashMap<String,Double>> factors_contains_hidden = new ArrayList<>();
+            for (Variable is_contain : factor_net.getNet()){
+                if(is_contain.getCPT().keySet().toString().contains(hidden)){
+                    factors_contains_hidden.add(is_contain.getCPT());
+                }
+            }
+            // running all over the factors that contains the hidden variables and finding the two minimum factor sizes
+            // to send them to the join_two_factors function, because I join factors by their size
+            for (int i = 0; i < factors_contains_hidden.size()-1; i++) {
+                min_factor_size1 = 0;
+                min_factor_size2 = 0;
+                for (int j = 0; j < factors_contains_hidden.size(); j++){
+                    if (factors_contains_hidden.get(j).size() < min_factor_size1){
+                        min_factor_size1 = factors_contains_hidden.get(j).size();
+                        index_min_factor1 = j;
+                    }
+                }
+                join_factor1 = factors_contains_hidden.get(index_min_factor1);
+                factors_contains_hidden.remove(factors_contains_hidden.get(index_min_factor1));
+
+                for (int j = 0; j < factors_contains_hidden.size(); j++){
+                    if (factors_contains_hidden.get(j).size() < min_factor_size2){
+                        min_factor_size2 = factors_contains_hidden.get(j).size();
+                        index_min_factor2 = j;
+                    }
+                }
+                join_factor2 = factors_contains_hidden.get(index_min_factor2);
+                factors_contains_hidden.remove(factors_contains_hidden.get(index_min_factor2));
+                factors_contains_hidden.add(join_two_factors(join_factor1, join_factor2));
+            }
+        }
+    }
+    public HashMap<String,Double> join_two_factors(HashMap<String,Double> factor1, HashMap<String,Double> factor2){
+        HashMap<String,Double> merged_factor = new HashMap<>();
+        return  null;
+    }
+    // The eliminate function...
+//    public void eliminate(){
+//
+//    }
+
 }
