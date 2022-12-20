@@ -9,10 +9,4 @@
 //    public HashMap<String, Double> join(){// only multiply
 //
 //    }
-//    public HashMap<String, Double> eliminate(){// (can be multiplication and adding) by ABC
-//
-//    }
-//    public HashMap<String, Double> merge(){
-//
-//    }
 //}

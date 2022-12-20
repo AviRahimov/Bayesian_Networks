@@ -8,8 +8,8 @@ import java.util.Scanner;
 
 public class Ex1 {
     public static void main(String[]args) throws IOException {
-//        XMLParser xml = new XMLParser("alarm_net.xml");
-        XMLParser xml = new XMLParser("big_net.xml");
+        XMLParser xml = new XMLParser("alarm_net.xml");
+//        XMLParser xml = new XMLParser("big_net.xml");
 //        Variable R = new Variable("R", new String[]{"T", "F"});
 //        Variable C = new Variable("C", new String[]{"T", "F"});
 //        Variable H = new Variable("H", new String[]{"T", "F"});
@@ -28,17 +28,15 @@ public class Ex1 {
 //        xml.getNet().getVars("D").addParent(C);
 
 //        Algorithms a = new Algorithms("P(J=T|B=T,A=F)", xml.getNet());
-//        VariableElimination_algo v = new VariableElimination_algo("P(J=T|B=T,A=F)", xml.getNet());
-        VariableElimination_algo v = new VariableElimination_algo("P(D1=T|C2=v1,C3=F)", xml.getNet());
+        VariableElimination_algo v = new VariableElimination_algo("P(J=T|B=T,A=F)", xml.getNet());
+//        VariableElimination_algo v = new VariableElimination_algo("P(D1=T|C2=v1,C3=F)", xml.getNet());
 //        System.out.printf("%.5f %n", a.Simple_dist());
 //        System.out.println(a.getAdd_count());
 //        System.out.println(a.getMult_count());
 //        System.out.println(xml.getNet());
-        v.Evidence_elimination();
-        v.Hidden_elimination();
-        v.join();
 //        System.out.println("**********************************************************************************");
-//        System.out.println(xml.getNet());
+//        System.out.println(v.getFactor_net());
+        v.Variable_elimination();
         }
 
 
