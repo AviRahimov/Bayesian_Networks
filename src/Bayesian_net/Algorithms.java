@@ -27,7 +27,7 @@ public class Algorithms {
     public double cpt_is_exist(String question){
         String temp_exist = "";
 
-        for (String exist_cpt: net.getVars(String.valueOf(question.substring(2, question.indexOf("=")))).getCPT().keySet()){
+        for (String exist_cpt: net.getVars(question.substring(2, question.indexOf("="))).getCPT().keySet()){
             temp_exist = exist_cpt.replace("|", ",");
             temp_exist = temp_exist.replace(")", ",");
             int temp_count = 2;
