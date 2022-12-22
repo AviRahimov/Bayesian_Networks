@@ -17,7 +17,8 @@ public class VariableElimination_algo {
     public VariableElimination_algo(String question, BayesianNetwork factor_net){
         this.question = question;
         this.factor_net = factor_net;
-        this.full_net = new BayesianNetwork(factor_net);
+        this.full_net = new BayesianNetwork();
+        this.full_net.setNet((ArrayList<Variable>) this.factor_net.getNet().clone());
     }
 
     public ArrayList<String> getEvidence(){
@@ -41,8 +42,14 @@ public class VariableElimination_algo {
     }
     public ArrayList<Variable> getHidden(BayesianNetwork net){
         hidden_variables = new ArrayList<>();
+        int index = 0;
         for (int i = 0; i < net.getNet().size(); i++) {
+            index = question.indexOf(net.getNet().get(i).getVar_name());
             if(!(question.contains(net.getNet().get(i).getVar_name()))){
+                hidden_variables.add(net.getNet().get(i));
+            }
+
+            else if (question.substring(index-1).indexOf("=") == 0){
                 hidden_variables.add(net.getNet().get(i));
             }
         }
@@ -85,7 +92,7 @@ public class VariableElimination_algo {
         }
         ArrayList<Variable> to_remove = new ArrayList<>();
         for (Variable variable : factor_net.getNet()){
-            if (variable.getCPT().size() == 1){
+            if (variable.getCPT().size() <= 1){
                 to_remove.add(variable);
             }
         }
@@ -94,23 +101,23 @@ public class VariableElimination_algo {
         }
     }
     public String pure_factor_from_evidence(String to_change, String [] evidences){
+        StringBuffer to_delete = new StringBuffer(to_change);
+        int start, end = 0;
         for (String evidence : evidences){
             if (to_change.contains(evidence)){
-                to_change = to_change.replace(evidence, "");
+                if(to_delete.indexOf(evidence) == 2){
+                    start = 2;
+                    end = evidence.length()+3;
+                    to_delete = to_delete.delete(start, end);
+                }
+                else {
+                    start = to_delete.indexOf(evidence)-1;
+                    end = evidence.length()+start+1;
+                    to_delete = to_delete.delete(start, end);
+                }
             }
         }
-        if (to_change.indexOf("|") == 2){
-            to_change = to_change.replace("|", "");
-        }
-        for (int i = 0; i < to_change.length()-1; i++) {
-            if(to_change.charAt(i) == to_change.charAt(i+1)){
-                to_change = to_change.substring(0, i) + to_change.substring(i+1);
-                i--;
-            }
-            if(to_change.charAt(to_change.length()-2) == '|' || to_change.charAt(to_change.length()-2) == ','){
-                to_change = to_change.substring(0, to_change.length()-2) + ")";
-            }
-        }
+        to_change = to_delete.toString();
         return to_change;
     }
 
@@ -134,12 +141,12 @@ public class VariableElimination_algo {
     // must become after running the evidence elimination because we need the factors and not the full CPT
     public void Hidden_elimination(){
         hidden_variables = getHidden(factor_net);
-       ArrayList<Variable> copy_hidden = (ArrayList<Variable>) hidden_variables.clone();
-       for(Variable hid : copy_hidden){
-           if(!(is_contain_QueryOrEvidence(hid))){
+        ArrayList<Variable> copy_hidden = (ArrayList<Variable>) hidden_variables.clone();
+        for(Variable hid : copy_hidden){
+            if(!(is_contain_QueryOrEvidence(hid))){
                factor_net.getNet().remove(hid);
-           }
-       }
+            }
+        }
     }
     // The recursion function to find if a hidden variable is an ancient parent of query or evidence variable
     public boolean is_contain_QueryOrEvidence(Variable hid){
@@ -175,27 +182,38 @@ public class VariableElimination_algo {
                 }
             }
         }
+        System.out.println("NEW******************************************************************************************************************************************");
         HashMap<String,Double> merged_factors = new HashMap<>();
-        ArrayList<HashMap<String,Double>> factors_containing_hidden_copy = (ArrayList<HashMap<String, Double>>) factors_containing_hidden.clone();
-        for (int i = 0; i < factors_containing_hidden_copy.size()-1; i++) {
-            // find two minimalistic factors
-            ArrayList<HashMap<String,Double>> two_minimal_factors = find_two_minimal_factors((ArrayList<HashMap<String, Double>>) factors_containing_hidden.clone());
-            // removing from the list of factors that containing the hidden variables the two minimalistic
-            // factors, and then I will add the joined factor of them.
-            for (HashMap<String,Double> remove_factor : two_minimal_factors){
-                factors_containing_hidden.remove(remove_factor);
-            }
+        if(factors_containing_hidden.size()==1){
+            System.out.println("The hidden variable I'm going to eliminate is: " + hidden);
+            merged_factors = eliminate(factors_containing_hidden.get(0), hidden);
+            factors_containing_hidden.remove(factors_containing_hidden.get(0));
+            factors_containing_hidden.add(merged_factors);
+            System.out.println("END NEW***************************************************************************************************************************************");
+        }
+        else {
+            ArrayList<HashMap<String, Double>> factors_containing_hidden_copy = (ArrayList<HashMap<String, Double>>) factors_containing_hidden.clone();
+            for (int i = 0; i < factors_containing_hidden_copy.size() - 1; i++) {
+                // find two minimalistic factors
+                ArrayList<HashMap<String, Double>> two_minimal_factors = find_two_minimal_factors((ArrayList<HashMap<String, Double>>) factors_containing_hidden.clone());
+                // removing from the list of factors that containing the hidden variables the two minimalistic
+                // factors, and then I will add the joined factor of them.
+                for (HashMap<String, Double> remove_factor : two_minimal_factors) {
+                    factors_containing_hidden.remove(remove_factor);
+                }
         /*
          saving  2 minimum factor sizes to find the two minimalistic factors and join them
          in addition, saving their indexes to send them to the join_two_factors function,
          I'm not sending the factors in the current map of factors because I remove them from the map
         and can't access them after deletion.
         */
-            merged_factors = two_factors_to_join(two_minimal_factors.get(0), two_minimal_factors.get(1));
-            factors_containing_hidden.add(merged_factors);
+                merged_factors = two_factors_to_join(two_minimal_factors.get(0), two_minimal_factors.get(1));
+                factors_containing_hidden.add(merged_factors);
+            }
+
+            factors_containing_hidden.add(eliminate(merged_factors, hidden));
+            factors_containing_hidden.remove(merged_factors);
         }
-        factors_containing_hidden.add(eliminate(merged_factors, hidden));
-        factors_containing_hidden.remove(merged_factors);
         return factors_containing_hidden.get(0);
     }
 
@@ -329,20 +347,32 @@ public class VariableElimination_algo {
     }
     //The eliminate function...
     public HashMap<String,Double> eliminate(HashMap<String,Double> factor_to_eliminate, String variable_to_eliminate){
+        System.out.println("Variable to eliminate: " + variable_to_eliminate);
+        System.out.println("The factor that holds the variable: " + factor_to_eliminate);
         if(factor_to_eliminate.size()>2) {
             HashMap<String, Double> factor_after_elimination = new HashMap<>();
             ArrayList<Variable> all_var_without_varElim = new ArrayList<>();
+            // string_to_var contains the variables in all_var_without_varElim in String
             ArrayList<String> string_to_var = new ArrayList<>();
-            String constant;
-            if (factor_to_eliminate.keySet().toArray()[0].toString().contains("|")) {
-                constant = factor_to_eliminate.keySet().toArray()[0].toString().substring(factor_to_eliminate.keySet().toArray()[0].toString().indexOf("|") + 1);
-            } else {
-                constant = factor_to_eliminate.keySet().toArray()[0].toString().substring(factor_to_eliminate.keySet().toArray()[0].toString().indexOf(",") + 1);
-            }
-            String temp = constant;
-            int i = -1;
+            // Creating StringBuffer because later I will delete char in the string and, it's easy to do
+            // with StringBuffer.
+            StringBuffer constant = new StringBuffer("");
             // taking random key from the factor to extract the variables without the variable I eliminate
             // and because it doesn't matter what is the outcome so, I can choose random key.
+            String search = factor_to_eliminate.keySet().toArray()[0].toString();
+            String sub_string = search.substring(search.indexOf(variable_to_eliminate));
+            int index_of_var_eliminate = search.indexOf(variable_to_eliminate);
+            String temp;
+            try {
+                constant.append(search.replace(sub_string.substring(0,sub_string.indexOf(",")),""));
+                constant.deleteCharAt(index_of_var_eliminate);
+                temp = constant.toString().substring(2);
+            }
+            catch (Exception e){
+                return factor_to_eliminate;
+            }
+
+            int i = -1;
             while (i < constant.length() && i != 0) {
                 string_to_var.add(temp.substring(0, temp.indexOf("=")));
                 if (temp.contains("|")) {
@@ -356,6 +386,7 @@ public class VariableElimination_algo {
             for (String s : string_to_var) {
                 all_var_without_varElim.add(copy_factor_net.getVars(s));
             }
+            System.out.println("The variables without the variable that need to be eliminated are: " + all_var_without_varElim);
             String[] elimination_truth_table = make_truth_table(all_var_without_varElim);
             Double[] elimination_prob_truth_table = new Double[elimination_truth_table.length];
             Arrays.fill(elimination_prob_truth_table, 0.0);
@@ -366,7 +397,8 @@ public class VariableElimination_algo {
                 for (String keys : factor_strings) {
                     keys = keys + ")";
                     keys = keys.replace(", ", "");
-                    if (keys.contains(elimination_truth_table[j].substring(2, elimination_truth_table[j].length() - 1))) {
+
+                    if (is_contain_NotInOrder(keys, elimination_truth_table[j].substring(2, elimination_truth_table[j].length() - 1))) {
                         elimination_prob_truth_table[j] += factor_to_eliminate.get(keys);
                         count++;
                     }
@@ -382,6 +414,15 @@ public class VariableElimination_algo {
         else{
             return factor_to_eliminate;
         }
+    }
+    public boolean is_contain_NotInOrder(String full, String sub_str){
+        String [] sub_str_arr = sub_str.split(",");
+        for (String sub_string : sub_str_arr){
+            if(!(full.contains(sub_string))){
+                return false;
+            }
+        }
+        return true;
     }
     public String[] make_truth_table(ArrayList<Variable> variables){
         int table_size = 1;
@@ -435,7 +476,136 @@ public class VariableElimination_algo {
         add_count--;
         return (mone/to_divide);
     }
+    public double question_is_exist_in_net(String question){
+        String temp_exist = "";
+
+        for (String exist_cpt: full_net.getVars(question.substring(2, question.indexOf("="))).getCPT().keySet()){
+            temp_exist = exist_cpt.replace("|", ",");
+            temp_exist = temp_exist.replace(")", ",");
+            int temp_count = 2;
+            boolean is_exist = true;
+            for (int j = 0; j < question.chars().filter(ch -> ch == '=').count();j++){
+                try {
+                    if(!(question.contains(temp_exist.substring(temp_count, temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + temp_count)))){
+                        is_exist = false;
+                        break;
+                    }
+                } catch (StringIndexOutOfBoundsException e) {
+                    return -1;
+                }
+
+                temp_count+=temp_exist.substring(temp_count, temp_exist.length()).indexOf(",")+1;
+            }
+            if (is_exist == true){
+                String cpt = question.substring(2, question.indexOf("="));
+                return factor_net.getVars(cpt).getCPT().get(exist_cpt);
+            }
+        }
+        return -1;
+    }
     public double Variable_elimination(){
+        System.out.println("the factor net before changes factor_net: " + factor_net);
+        if (question_is_exist_in_net(question) == -1) {
+            Evidence_elimination();
+            System.out.println("the net after evidence elimination " + factor_net);
+            System.out.println("*****************************************************************************************");
+            Hidden_elimination();
+            System.out.println("the net after hidden elimination " + factor_net);
+            System.out.println("*****************************************************************************************");
+            // Sorting the hidden variables
+            hidden_variables = getHidden(factor_net);
+            ArrayList<String> hidden_sorted = new ArrayList<>();
+            for (Variable hidden : hidden_variables) {
+                hidden_sorted.add(hidden.getVar_name());
+            }
+            Collections.sort(hidden_sorted);
+            System.out.println("the sorted arraylist of hidden variables " + hidden_sorted);
+            System.out.println("*****************************************************************************************");
+            // copy the factor_net to work on it and to make changes on it because if I want to delete some
+            // variable from the net, so I can't do this on the original net.
+            copy_factor_net = new BayesianNetwork(factor_net);
+            // find the factors that contains the hidden variables
+            for (String hidden : hidden_sorted) {
+                System.out.println("the factor net before eliminate the hidden " + hidden + " is" + factor_net);
+                System.out.println("***********************************************************************************");
+                ArrayList<HashMap<String, Double>> factors_contains_hidden = new ArrayList<>();
+                for (Variable is_contain : factor_net.getNet()) {
+                    if (is_contain.getCPT().keySet().toString().contains(hidden)) {
+                        factors_contains_hidden.add(is_contain.getCPT());
+                    }
+                }
+                System.out.println("the factors that contains the hidden variable " + hidden + " are: " + factors_contains_hidden);
+                System.out.println("the size of the factors is: " + factors_contains_hidden.size());
+                System.out.println("***********************************************************************************");
+                Variable eliminated_var = new Variable("eliminated_var", null);
+                eliminated_var.setCPT(join(factors_contains_hidden, hidden));
+                factor_net.getNet().add(eliminated_var);
+                System.out.println("the factor net after eliminate the " + hidden + " variable " + factor_net);
+            }
+            System.out.println("***********************************************************************************");
+            System.out.println("the factor net after joining all the hidden variables: " + factor_net);
+
+            ArrayList<HashMap<String, Double>> query_and_last_factor = new ArrayList<>();
+            for (Variable variable : factor_net.getNet()) {
+                query_and_last_factor.add(variable.getCPT());
+            }
+            System.out.println("***********************************************************************************");
+            System.out.println("The query factor and the last factor are: " + query_and_last_factor);
+            HashMap<String, Double> result_factor;
+            result_factor = join_query(query_and_last_factor);
+            System.out.println("***********************************************************************************");
+            System.out.println("The result factor is: " + result_factor);
+            String final_question = question.substring(0, question.indexOf("|")) + ")";
+            return normalize(result_factor, final_question);
+        }
+        return question_is_exist_in_net(question);
+    }
+    public BayesianNetwork getFactor_net() {
+        return factor_net;
+    }
+
+    public int getMult_count() {
+        return mult_count;
+    }
+
+    public int getAdd_count() {
+        return add_count;
+    }
+    public ArrayList<String> different_heuristic(){
+        ArrayList<String> sorted_min_edges = new ArrayList<>(full_net.getNet().size());
+        Integer [] number_of_edges = new Integer[full_net.getNet().size()];
+        Variable temp;
+        for (int i = 0; i < full_net.getNet().size(); i++) {
+            temp = full_net.getNet().get(i);
+//            number_of_edges[i] = temp.getParents().size()+temp.getChildren().size();
+            number_of_edges[i] = temp.getOutcomes().length;
+        }
+        Arrays.sort(number_of_edges);
+        boolean flag = true;
+        for (Variable variable : full_net.getNet()){
+            flag = true;
+            for (String evid : getEvidence()){
+                if (evid.contains(variable.getVar_name())){
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag == true){
+                if(!(getQuery().getVar_name().equals(variable.getVar_name()))){
+                    for (int number_of_edge : number_of_edges){
+                        if (variable.getChildren().size()+variable.getParents().size() == number_of_edge){
+                            sorted_min_edges.add(variable.getVar_name());
+                            break;
+                        }
+                    }
+                }
+            }
+            }
+        return sorted_min_edges;
+    }
+    public double Different_heuristic_Variable_elimination(){
+        this.factor_net.setNet((ArrayList<Variable>) full_net.getNet().clone());
+        System.out.println("the full net is: " + full_net);
         System.out.println("the factor net before changes factor_net: " + factor_net);
 //        question_is_exist_in_net();
         Evidence_elimination();
@@ -446,11 +616,7 @@ public class VariableElimination_algo {
         System.out.println("*****************************************************************************************");
         // Sorting the hidden variables
         hidden_variables = getHidden(factor_net);
-        ArrayList<String> hidden_sorted = new ArrayList<>();
-        for (Variable hidden : hidden_variables){
-            hidden_sorted.add(hidden.getVar_name());
-        }
-        Collections.sort(hidden_sorted);
+        ArrayList<String> hidden_sorted = different_heuristic();
         System.out.println("the sorted arraylist of hidden variables " + hidden_sorted);
         System.out.println("*****************************************************************************************");
         // copy the factor_net to work on it and to make changes on it because if I want to delete some
@@ -466,12 +632,15 @@ public class VariableElimination_algo {
                     factors_contains_hidden.add(is_contain.getCPT());
                 }
             }
-            System.out.println("the factors that contains the hidden variable " + hidden + " are: " + factors_contains_hidden);
-            System.out.println("***********************************************************************************");
-            Variable eliminated_var = new Variable("eliminated_var", null);
-            eliminated_var.setCPT(join(factors_contains_hidden, hidden));
-            factor_net.getNet().add(eliminated_var);
-            System.out.println("the factor net after eliminate the " + hidden + " variable " + factor_net);
+            if(factors_contains_hidden.size()!=0) {
+                System.out.println("the factors that contains the hidden variable " + hidden + " are: " + factors_contains_hidden);
+                System.out.println("the size of the factors is: " + factors_contains_hidden.size());
+                System.out.println("***********************************************************************************");
+                Variable eliminated_var = new Variable("eliminated_var", null);
+                eliminated_var.setCPT(join(factors_contains_hidden, hidden));
+                factor_net.getNet().add(eliminated_var);
+                System.out.println("the factor net after eliminate the " + hidden + " variable " + factor_net);
+            }
         }
         System.out.println("***********************************************************************************");
         System.out.println("the factor net after joining all the hidden variables: " + factor_net);
@@ -488,16 +657,5 @@ public class VariableElimination_algo {
         System.out.println("The result factor is: " + result_factor);
         String final_question = question.substring(0, question.indexOf("|")) + ")";
         return normalize(result_factor, final_question);
-    }
-    public BayesianNetwork getFactor_net() {
-        return factor_net;
-    }
-
-    public int getMult_count() {
-        return mult_count;
-    }
-
-    public int getAdd_count() {
-        return add_count;
     }
 }

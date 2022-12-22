@@ -152,31 +152,36 @@ public class Algorithms {
         for(String s:all_var_to_count){
             curr = s.substring(2, s.length());
             for (int i = 0; i <net.getNet().size(); i++) {
-                if(net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).isParent()){
-                    for (String exist_cpt: net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getCPT().keySet()){
-                        temp_exist = exist_cpt.replace("|", ",");
-                        temp_exist = temp_exist.replace(")", ",");
-                        int temp_count = 2;
-                        boolean is_exist = true;
-                        for (int j = 0; j < net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getParents().size()+1; j++){
-                            if(!(s.contains(temp_exist.substring(temp_count, temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + temp_count)))){
-                                is_exist = false;
+                try {
+
+                    if (net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).isParent()) {
+                        for (String exist_cpt : net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getCPT().keySet()) {
+                            temp_exist = exist_cpt.replace("|", ",");
+                            temp_exist = temp_exist.replace(")", ",");
+                            int temp_count = 2;
+                            boolean is_exist = true;
+                            for (int j = 0; j < net.getVars(String.valueOf(curr.substring(0, curr.indexOf("=")))).getParents().size() + 1; j++) {
+                                if (!(s.contains(temp_exist.substring(temp_count, temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + temp_count)))) {
+                                    is_exist = false;
+                                    break;
+                                }
+                                temp_count += temp_exist.substring(temp_count, temp_exist.length()).indexOf(",") + 1;
+                            }
+                            if (is_exist == true) {
+                                final_prob[counter] += exist_cpt;
                                 break;
                             }
-                            temp_count+=temp_exist.substring(temp_count, temp_exist.length()).indexOf(",")+1;
                         }
-                        if (is_exist == true){
-                            final_prob[counter] += exist_cpt;
-                            break;
-                        }
+                    } else {
+                        final_prob[counter] += "P(" + curr.substring(0, curr.indexOf(",")) + ")";
+                    }
+
+                    if (curr.indexOf(",") != curr.length()) {
+                        curr = curr.substring(curr.indexOf(",") + 1, curr.length());
                     }
                 }
-                else{
-                    final_prob[counter] += "P(" + curr.substring(0, curr.indexOf(",")) + ")";
-                }
-
-                if (curr.indexOf(",") != curr.length()){
-                    curr = curr.substring(curr.indexOf(",") + 1, curr.length());
+                catch (StringIndexOutOfBoundsException e){
+                    continue;
                 }
             }
             counter++;

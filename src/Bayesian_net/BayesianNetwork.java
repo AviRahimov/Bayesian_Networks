@@ -9,18 +9,18 @@ public class BayesianNetwork {
         this.Net = new ArrayList<>();
     }
     public BayesianNetwork(BayesianNetwork copy_net){
-        this.Net = new ArrayList<>();
-        for (int i = 0; i < copy_net.Net.size(); i++) {
-            this.Net.add(new Variable(copy_net.Net.get(i).getVar_name(), copy_net.Net.get(i).getOutcomes()));
-            this.Net.get(i).setCPT(new HashMap<>(copy_net.Net.get(i).getCPT()));
-            for (int j = 0; j < copy_net.Net.get(i).getParents().size(); j++) {
-                this.Net.get(i).addParent(copy_net.Net.get(i).getParents().get(j));
-            }
-            for (int j = 0; j < copy_net.Net.get(i).getChildren().size(); j++) {
-                this.Net.get(i).addChild(copy_net.Net.get(i).getChildren().get(j));
-            }
-
-        }
+//        this.Net = new ArrayList<>();
+        this.Net = (ArrayList<Variable>) copy_net.getNet().clone();
+//        for (int i = 0; i < copy_net.getNet().size(); i++) {
+//            this.Net.add(new Variable(copy_net.getNet().get(i).getVar_name(), copy_net.getNet().get(i).getOutcomes()));
+//            this.Net.get(i).setCPT(new HashMap<>(copy_net.getNet().get(i).getCPT()));
+//            for (int j = 0; j < copy_net.getNet().get(i).getParents().size(); j++) {
+//                this.Net.get(i).addParent(copy_net.getNet().get(i).getParents().get(j));
+//            }
+//            for (int j = 0; j < copy_net.getNet().get(i).getChildren().size(); j++) {
+//                this.Net.get(i).addChild(copy_net.getNet().get(i).getChildren().get(j));
+//            }
+//        }
     }
     public void Add_Var(Variable var){
         this.Net.add(var);
@@ -50,5 +50,9 @@ public class BayesianNetwork {
         return "BayesianNetwork{" +
                 "Net=" + Net +
                 '}';
+    }
+
+    public void setNet(ArrayList<Variable> setting) {
+        this.Net = setting;
     }
 }
