@@ -384,7 +384,7 @@ public class VariableElimination_algo {
                 }
             }
             for (String s : string_to_var) {
-                all_var_without_varElim.add(copy_factor_net.getVars(s));
+                all_var_without_varElim.add(full_net.getVars(s));
             }
             System.out.println("The variables without the variable that need to be eliminated are: " + all_var_without_varElim);
             String[] elimination_truth_table = make_truth_table(all_var_without_varElim);

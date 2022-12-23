@@ -11,14 +11,14 @@ public class Ex1 {
 //        XMLParser xml = new XMLParser("net3.xml");
 //        XMLParser xml = new XMLParser("net4.xml");
 //        XMLParser xml = new XMLParser("net5.xml");
-//        XMLParser xml = new XMLParser("net6.xml");
-        XMLParser xml = new XMLParser("net7.xml");
+        XMLParser xml = new XMLParser("net6.xml");
+//        XMLParser xml = new XMLParser("net7.xml");
 //        XMLParser xml = new XMLParser("net8.xml");
 //        XMLParser xml = new XMLParser("net9.xml");
 //        XMLParser xml = new XMLParser("net10.xml");
         /*
-net3.xml
-P(S=ok|M=N) = 0.37606 add=17 mul=54 // not working well with the first algorithm
+net3.xml // working well
+P(S=ok|M=N) = 0.37606 add=17 mul=54
 P(S=ok|M=N) = 0.37606,17,27
 P(M=N|S=ok,F=annoying) = 0.89250 add=3 mul=12
 P(M=N|S=ok,F=annoying) = 0.89250,3,4
@@ -32,12 +32,12 @@ P(S=T|L=F,G=high) = 0.55050,5,10
 P(G=low|L=F,S=T) = 0.73694 add=11 mul=48
 P(G=low|L=F,S=T) = 0.73694,11,23
 
-net5.xml
+net5.xml // working well
 P(G=low|B=F,H=F,F=always) = 0.41379 add=2 mul=9
 P(G=low|B=F,H=F,F=always) = 0.41379,2,3
 P(B=T|F=never,G=medium) = 0.44444 add=3 mul=12
 P(B=T|F=never,G=medium) = 0.44444,1,2
-P(G=low|B=F,H=F) = 0.21083 add=8 mul=27 // not working well on the first algorithm
+P(G=low|B=F,H=F) = 0.21083 add=8 mul=27
 P(G=low|B=F,H=F) = 0.21083,8,12
 
 net6.xml // working well
@@ -49,7 +49,7 @@ P(C=stay|B=set,A=F) = 0.15000 add=2 mul=6
 P(C=stay|B=set,A=F) = 0.15000,2,0
 
 net7.xml
-P(A=T|E=two,F=two),1 // not working on the second algorithm
+P(A=T|E=two,F=two),1 // for the second algorithm: 0.49906493181156375, 15, 32 not the same answer for the first algorithm
 P(A=F|B=T,C=F,D=T),1
 P(A=F|B=T,C=F,D=T),2
 P(G=one|B=T,I=ken),1
@@ -58,15 +58,15 @@ P(D=T|E=one),1
 P(D=T|E=one),2
          */
 //        System.out.println("In the simple heuristic we getting: ");
-//        VariableElimination_algo v = new VariableElimination_algo("P(A=F|B=T,C=F,D=T)", xml.getNet());
-//        System.out.println(v.Variable_elimination());
-//        System.out.println(v.getAdd_count());
-//        System.out.println(v.getMult_count());
+        VariableElimination_algo v = new VariableElimination_algo("P(C=stay|B=set,A=F)", xml.getNet());
+        System.out.println(v.Variable_elimination());
+        System.out.println(v.getAdd_count());
+        System.out.println(v.getMult_count());
 //        System.out.println();
-        Algorithms a = new Algorithms("P(A=F|B=T,C=F,D=T)", xml.getNet());
-        System.out.println(a.Simple_dist());
-        System.out.println(a.getAdd_count());
-        System.out.println(a.getMult_count());
+//        Algorithms a = new Algorithms("P(A=T|E=two,F=two)", xml.getNet());
+//        System.out.println(a.Simple_dist());
+//        System.out.println(a.getAdd_count());
+//        System.out.println(a.getMult_count());
 //        VariableElimination_algo v1 = new VariableElimination_algo("P(S=ok|M=N)", xml.getNet());
 //        v1.different_heuristic();
 //        System.out.println("In the new heuristic we getting: ");

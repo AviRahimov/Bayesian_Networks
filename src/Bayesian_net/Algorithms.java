@@ -100,8 +100,13 @@ public class Algorithms {
         int num_outcomes_hidden = 1;
 
         // add the hidden variables to arraylist
+        int location = 0;
         for (int i = 0; i < net.getNet().size(); i++) {
+            location = question.indexOf(net.getNet().get(i).getVar_name());
             if(!(question.contains(net.getNet().get(i).getVar_name()))){
+                hidden.add(net.getNet().get(i));
+            }
+            else if (question.substring(location-1).indexOf("=") == 0){
                 hidden.add(net.getNet().get(i));
             }
         }
